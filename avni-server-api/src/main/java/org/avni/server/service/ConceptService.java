@@ -332,7 +332,7 @@ public class ConceptService implements NonScopeAwareService {
     }
 
     public void addDependentConcepts(ConceptUsageContract conceptUsageContract, Concept answerConcept) {
-        List<ConceptAnswer> conceptAnswers = conceptAnswerRepository.findByAnswerConcept(answerConcept);
+        List<ConceptAnswer> conceptAnswers = conceptAnswerRepository.findByAnswerConceptAndIsVoidedFalse(answerConcept);
         conceptAnswers.forEach(ca -> {
             ReferenceDataContract conceptContract = new ReferenceDataContract();
             Concept concept = ca.getConcept();

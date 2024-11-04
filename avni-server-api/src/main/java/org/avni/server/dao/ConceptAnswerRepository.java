@@ -32,4 +32,6 @@ public interface ConceptAnswerRepository extends ReferenceDataRepository<Concept
     List<ConceptAnswer> findByAnswerConcept(Concept answerConcept);
 
     Page<ConceptAnswer> findByConceptAndIsVoidedFalse(Concept concept, Pageable pageable);
+
+    List<ConceptAnswer> findByAnswerConceptAndIsVoidedFalse(Concept answerConcept);
 }

@@ -155,11 +155,31 @@ public class DatabaseService implements QuestionCreationService{
         }
     }
 
+    public void createAdvancedQuestion() {
+        QuestionConfig config = new QuestionConfig()
+                .withAggregation(AggregationType.COUNT)
+                .withBreakout("name", "subject_type_id")
+                .withFilters(
+                        new FilterCondition(ConditionType.EQUAL, databaseRepository.getFieldDetailsByName(metabaseService.getGlobalDatabase(), new TableDetails("individual"), new FieldDetails("is_voided")).getId() , FieldType.BOOLEAN.getTypeName(), false),
+                        new FilterCondition(ConditionType.BETWEEN, databaseRepository.getFieldDetailsByName(metabaseService.getGlobalDatabase(), new TableDetails("individual"), new FieldDetails("created_date_time")).getId() , FieldType.DATETIME.getTypeName(), new String[]{"2024-11-01", "2024-12-19"})
+                )
+                .withVisualization(VisualizationType.BAR, VisualizationAttributes.GRAPH_DIMENSIONS, VisualizationAttributes.GRAPH_METRICS);
+        MetabaseQuery query = databaseRepository.createAdvancedQuery("individual", "subject_type", config, metabaseService.getGlobalDatabase());
+        databaseRepository.postQuestion(
+                "Individual, Count, Grouped by Subject Type → Name, Filtered by Is Voided is false and Created Date Time is Nov 1 – Dec 19, 2024",
+                query,
+                config,
+                metabaseService.getGlobalCollection().getIdAsInt()
+        );
+    }
+
     public void createQuestions() {
         createQuestionsForSubjectTypes();
 
         createQuestionsForProgramsAndEncounters();
 
         createQuestionsForIndividualTables();
+
+        createAdvancedQuestion();
     }
 }

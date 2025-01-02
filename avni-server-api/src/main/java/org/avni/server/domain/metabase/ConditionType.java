@@ -2,7 +2,8 @@ package org.avni.server.domain.metabase;
 
 public enum ConditionType {
     EQUAL("="),
-    NOT_EQUAL("!=");
+    NOT_EQUAL("!="),
+    BETWEEN("between");
 
     private final String operator;
 

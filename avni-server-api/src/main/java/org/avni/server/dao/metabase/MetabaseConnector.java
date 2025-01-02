@@ -17,7 +17,7 @@ public class MetabaseConnector {
     protected final RestTemplate restTemplate;
 
     @Value("${metabase.api.url}")
-    protected String metabaseApiUrl;
+    public String metabaseApiUrl;
 
     @Value("${metabase.api.key}")
     protected String apiKey;

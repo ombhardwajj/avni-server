@@ -51,8 +51,36 @@ public class MetabaseQueryBuilder {
         return this;
     }
 
+    public MetabaseQueryBuilder addAggregation(AggregationType aggregationType) {
+        queryNode.putArray(QueryAttribute.AGGREGATION.getValue()).add(objectMapper.createArrayNode().add(aggregationType.getValue()));
+        return this;
+    }
+
+    public MetabaseQueryBuilder addBreakout(int fieldId, String baseType, int sourceFieldId) {
+        ArrayNode breakoutArray = objectMapper.createArrayNode();
+        breakoutArray.add(QueryAttribute.FIELD.getValue());
+        breakoutArray.add(fieldId);
+
+        ObjectNode fieldDetails = objectMapper.createObjectNode();
+        fieldDetails.put(QueryAttribute.BASE_TYPE.getValue(), baseType);
+        fieldDetails.put(QueryAttribute.SOURCE_FIELD.getValue(), sourceFieldId);
+
+        breakoutArray.add(fieldDetails);
+        queryNode.withArray(QueryAttribute.BREAKOUT.getValue()).add(breakoutArray);
+        return this;
+    }
+
+    public MetabaseQueryBuilder addFilter(FilterCondition[] conditions) {
+            ArrayNode filterArray = objectMapper.createArrayNode();
+            filterArray.add("and");
+            for (FilterCondition condition : conditions) {
+                filterArray.add(condition.toJson());
+            }
+            queryNode.set(QueryAttribute.FILTER.getValue(), filterArray);
+            return this;
+    }
 
     public MetabaseQuery build() {
-        return new MetabaseQuery(database.getId(), queryNode);
+            return new MetabaseQuery(database.getId(), queryNode);
     }
 }

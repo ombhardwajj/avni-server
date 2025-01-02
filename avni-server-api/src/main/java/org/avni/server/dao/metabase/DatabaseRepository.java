@@ -4,12 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.avni.server.domain.metabase.*;
 import org.avni.server.util.ObjectMapperSingleton;
 import org.avni.server.util.S;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Repository;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -126,6 +126,34 @@ public class DatabaseRepository extends MetabaseConnector {
         );
 
         postForObject(metabaseApiUrl + "/card", requestBody.toJson(), JsonNode.class);
+    }
+
+    public MetabaseQuery createAdvancedQuery(String primaryTableName, String secondaryTableName, QuestionConfig config, Database database) {
+        TableDetails primaryTable = findTableDetailsByName(database, new TableDetails(primaryTableName));
+        FieldDetails primaryField = getFieldDetailsByName(database, primaryTable, new FieldDetails(config.getPrimaryField()));
+
+        TableDetails secondaryTable = findTableDetailsByName(database, new TableDetails(secondaryTableName));
+        FieldDetails breakoutField = getFieldDetailsByName(database, secondaryTable, new FieldDetails(config.getBreakoutField()));
+
+        return new MetabaseQueryBuilder(database, ObjectMapperSingleton.getObjectMapper().createArrayNode())
+                .forTable(primaryTable)
+                .addAggregation(config.getAggregationType())
+                .addBreakout(breakoutField.getId(), breakoutField.getBaseType(), primaryField.getId())
+                .addFilter(config.getFilters())
+                .build();
+    }
+
+    public void postQuestion(String questionName, MetabaseQuery query, QuestionConfig config, int collectionId) {
+        MetabaseRequestBody requestBody = new MetabaseRequestBody(
+                questionName,
+                query,
+                config.getVisualizationType(),
+                null,
+                config.getVisualizationSettingsAsObjectNode("name","count"),
+                collectionId
+        );
+
+        postForObject(metabaseApiUrl + "/card", requestBody.toJson(), ObjectNode.class);
     }
 
     private CollectionInfoResponse getCollectionForDatabase(Database database) {
